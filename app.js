@@ -3,6 +3,7 @@ const passport = require("passport");
 const authRoute = require("./routes/authRoute");
 const bodyParser = require("body-parser");
 const userRoute = require("./routes/userRoute");
+const blogRoute = require("./routes/blogRoute");
 
 require("./db").connectToMongoDB(); // Connect to MongoDB
 require("dotenv").config();
@@ -23,6 +24,7 @@ app.get("/", (req, res) => {
 app.use("/", authRoute);
 
 app.use("/", passport.authenticate("jwt", { session: false }), userRoute);
+app.use("/", blogRoute);
 
 app.listen(PORT, () => {
   console.log(`Server started on PORT: http://localhost:${PORT}`);

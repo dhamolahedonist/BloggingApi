@@ -10,9 +10,7 @@ const authRouter = express.Router();
 authRouter.post(
   "/signup",
   passport.authenticate("signup", { session: false }),
-  async (req, res) => {
-    console.log(req.body);
-
+  async (req, res, next) => {
     await userModel.findOneAndUpdate(
       { email: req.body.email },
       { first_name: req.body.first_name, last_name: req.body.last_name },
@@ -27,6 +25,7 @@ authRouter.post(
 
 authRouter.post("/login", async (req, res, next) => {
   passport.authenticate("login", async (err, user, info) => {
+    console.log(req.body);
     try {
       if (err) {
         return next(err);
@@ -40,6 +39,7 @@ authRouter.post("/login", async (req, res, next) => {
         if (error) return next(error);
 
         const body = { _id: user._id, email: user.email };
+        console.log(body);
         //You store the id and email in the payload of the JWT.
         // You then sign the token with a secret or key (JWT_SECRET), and send back the token to the user.
         // DO NOT STORE PASSWORDS IN THE JWT!

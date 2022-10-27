@@ -9,7 +9,6 @@ passport.use(
   new JWTstrategy(
     {
       secretOrKey: process.env.JWT_SECRET,
-      // jwtFromRequest: ExtractJWT.fromUrlQueryParameter('secret_token')
       jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken(), // Use this if you are using Bearer token
     },
     async (token, done) => {
@@ -50,6 +49,7 @@ passport.use(
 // This middleware authenticates the user based on the email and password provided.
 // If the user is found, it sends the user information to the next middleware.
 // Otherwise, it reports an error.
+
 passport.use(
   "login",
   new localStrategy(
