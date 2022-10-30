@@ -2,7 +2,7 @@ const Blog = require("../models/blogModel");
 const User = require("../models/userModel");
 
 // create blog
-exports.createBlog = async (req, res) => {
+exports.create = async (req, res) => {
   const newBlog = new Blog(req.body);
   try {
     const savedBlog = await newBlog.save();
@@ -12,14 +12,14 @@ exports.createBlog = async (req, res) => {
   }
 };
 // delete blog
-exports.deleteBlog = async (req, res) => {
+exports.delete = async (req, res) => {
   const { id } = req.params;
   const blog = await Blog.deleteOne({ _id: id });
   return res.json({ status: true, blog });
 };
 
 // get blog by id
-exports.getBlog = async (req, res) => {
+exports.get = async (req, res) => {
   try {
     const { blogId } = req.params;
 
@@ -70,7 +70,7 @@ exports.getBlog = async (req, res) => {
   }
 };
 // update the blog
-exports.updateBlog = async (req, res) => {
+exports.update = async (req, res) => {
   try {
     const { id } = req.params;
     const { state } = req.body;

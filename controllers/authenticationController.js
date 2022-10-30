@@ -27,20 +27,20 @@ passport.use(
 passport.use(
   "signup",
   new localStrategy(
-    {
-      usernameField: "email",
-      passwordField: "password",
-    },
+    { usernameField: "email", passwordField: "password" },
     async (email, password, done) => {
       try {
+        // Check if email exists
+
+        // Throw an error if email already exists
+
         const user = await userModel.create({
           email,
           password,
         });
-
         return done(null, user);
       } catch (error) {
-        done(error);
+        return done(null, { error: error.message });
       }
     }
   )

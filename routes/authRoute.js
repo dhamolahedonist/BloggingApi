@@ -2,6 +2,7 @@ const express = require("express");
 const passport = require("passport");
 const jwt = require("jsonwebtoken");
 const userModel = require("../models/userModel");
+const validateRegister = require("../middlewares/validations/validateRegister");
 const EXPIRES_IN = `1h`;
 require("dotenv").config();
 
@@ -9,16 +10,28 @@ const authRouter = express.Router();
 
 authRouter.post(
   "/signup",
+  validateRegister,
   passport.authenticate("signup", { session: false }),
-  async (req, res, next) => {
-    await userModel.findOneAndUpdate(
+  async (req, res) => {
+    const user = await userModel.findOneAndUpdate(
       { email: req.body.email },
       { first_name: req.body.first_name, last_name: req.body.last_name },
       { new: true }
     );
-    res.json({
-      message: "Signup successful",
-      user: req.user,
+
+    if (req.user.error) {
+      return res.json({
+        status: "Failed",
+        message: req.user.error,
+      });
+    }
+
+    return res.json({
+      status: "Successful",
+      message: "Singup Successful",
+      data: {
+        id: user._id,
+      },
     });
   }
 );
@@ -38,10 +51,7 @@ authRouter.post("/login", async (req, res, next) => {
         if (error) return next(error);
 
         const body = { _id: user._id, email: user.email };
-        console.log(body);
-        //You store the id and email in the payload of the JWT.
-        // You then sign the token with a secret or key (JWT_SECRET), and send back the token to the user.
-        // DO NOT STORE PASSWORDS IN THE JWT!
+
         const token = jwt.sign({ user: body }, process.env.JWT_SECRET, {
           expiresIn: EXPIRES_IN,
         });

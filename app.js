@@ -3,7 +3,7 @@ const passport = require("passport");
 const authRoute = require("./routes/authRoute");
 const bodyParser = require("body-parser");
 const userRoute = require("./routes/userRoute");
-const { blogRoute, blogRoutes } = require("./routes/blogRoute");
+const blogRoute = require("./routes/blogRoute");
 
 require("./db").connectToMongoDB(); // Connect to MongoDB
 require("dotenv").config();
@@ -21,11 +21,10 @@ app.get("/", (req, res) => {
   return res.json({ status: true });
 });
 
-app.use("/", authRoute);
+app.use("/auth", authRoute);
 
-app.use("/", blogRoutes);
-app.use("/", passport.authenticate("jwt", { session: false }), userRoute);
-app.use("/", blogRoute);
+app.use("/user", passport.authenticate("jwt", { session: false }), userRoute);
+app.use("/blog", blogRoute);
 
 app.listen(PORT, () => {
   console.log(`Server started on PORT: http://localhost:${PORT}`);
