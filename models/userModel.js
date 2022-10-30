@@ -3,6 +3,12 @@ const bcrypt = require("bcrypt");
 
 const UserSchema = new mongoose.Schema(
   {
+    blogs: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Blog",
+      },
+    ],
     first_name: {
       type: String,
     },

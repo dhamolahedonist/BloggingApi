@@ -1,4 +1,5 @@
 const Blog = require("../models/blogModel");
+const User = require("../models/userModel");
 
 // create blog
 exports.createBlog = async (req, res) => {
@@ -23,25 +24,42 @@ exports.getBlog = async (req, res) => {
     const { blogId } = req.params;
 
     const blog = await Blog.findById(blogId);
+    await User.aggregate([
+      {
+        $lookup: {
+          from: "users",
+          localField: "first_name",
+          foreignField: "_id",
+          as: "user",
+        },
+      },
+    ]);
+
+    // await User.findById(id)
+    //   .populate("blogs") // key to populate
+    //   .then((user) => console.log(user))
+    //   .catch((err) => console.log(err));
+
     // for everytime a blog is requested it increase the read_count by 1
     blog.read_count += 1;
 
-    // const blogPost = blog.body.length / 200;
+    // This calculates the time used to read a blog post
     const blogPost = blog.body.split(" ").length;
     const wordPerminute = 200;
     let readingTime = blogPost / wordPerminute;
-    readingTime = +readingTime.toFixed(1);
-    readingTime = `Approximate reading time ${readingTime} min. Word count: ${blogPost}`;
+
+    const splitNum = readingTime.toString().split(".");
+    const min = splitNum[0];
+    const sec = splitNum[1];
+    const convertToSeconds = sec * 0.6;
+    const roundSec = Math.floor(convertToSeconds);
+
+    readingTime = `Approximate reading time ${min}min ${roundSec}sec. Word count: ${blogPost}`;
 
     blog.reading_time = readingTime;
 
     blog.save();
 
-    // console.log(readingTime);
-    // const wordCount = blogPost.split(" ");
-    // console.log(wordCount);
-    // const seconds = wordCount;
-    // console.log(seconds);
     if (!blog) {
       3;
     }
@@ -77,15 +95,9 @@ exports.getBlogs = async (req, res) => {
   try {
     const { page = 1, limit = 20, state, author, title, tags } = req.query;
     const sort = [];
-    // const readCount = await Blog.find();
-    // // const firstCount = first[0].read_count;
-    // for (let count of readCount) {
-    //   const ans = (count.read_count += 1);
-    //   console.log(ans);
-    // }
 
     for (const param in req.query) {
-      if (["read_count", "createdAt"].includes(param)) {
+      if (["read_count", "createdAt", "reading_time"].includes(param)) {
         const direction = req.query[param];
         const sort_direction = direction == "asc" ? 1 : -1;
         const row_sort = [param, sort_direction];

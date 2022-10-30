@@ -25,7 +25,6 @@ authRouter.post(
 
 authRouter.post("/login", async (req, res, next) => {
   passport.authenticate("login", async (err, user, info) => {
-    console.log(req.body);
     try {
       if (err) {
         return next(err);
