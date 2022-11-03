@@ -31,8 +31,12 @@ passport.use(
     async (email, password, done) => {
       try {
         // Check if email exists
+        const emailExists = await userModel.findOne({ email });
 
         // Throw an error if email already exists
+        if (emailExists) {
+          throw new Error("Email already exist ");
+        }
 
         const user = await userModel.create({
           email,

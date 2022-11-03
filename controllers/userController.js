@@ -15,32 +15,16 @@ exports.updateUSer = async (req, res) => {
   }
 };
 
-exports.deleteUSer = async (req, res) => {
-  try {
-    await User.findByIdAndDelete(req.params.id);
-    res.status(200).json("user deleted successfully");
-  } catch (error) {
-    res.status(500).json(error);
-  }
-};
+// const blog = await Blog.deleteOne({ _id: id, user: req.user.user });
 
 // get user by id
 exports.getUser = async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
+    console.log(user._id);
     // destructured the user object. this allows me to get all other informations about a user except the password
     const { password, ...others } = user._doc;
     res.status(200).json(others);
-  } catch (error) {
-    res.status(500).json(error);
-  }
-};
-
-// get all users
-exports.getUsers = async (req, res) => {
-  try {
-    const users = await User.find();
-    res.status(200).json(users);
   } catch (error) {
     res.status(500).json(error);
   }

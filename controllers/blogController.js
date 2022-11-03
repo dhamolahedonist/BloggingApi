@@ -5,8 +5,9 @@ const User = require("../models/userModel");
 exports.create = async (req, res) => {
   const newBlog = new Blog(req.body);
   try {
+    newBlog.user = req.user.user._id;
     const savedBlog = await newBlog.save();
-    res.status(200).json(savedBlog);
+    res.status(200).json({ savedBlog });
   } catch (error) {
     res.status(500).json(error);
   }
@@ -14,8 +15,16 @@ exports.create = async (req, res) => {
 // delete blog
 exports.delete = async (req, res) => {
   const { id } = req.params;
-  const blog = await Blog.deleteOne({ _id: id });
-  return res.json({ status: true, blog });
+  const blog = await Blog.deleteOne({ _id: id, user: req.user.user });
+
+  if (blog.deletedCount) {
+    return res.json({ status: true, blog });
+  }
+
+  return res.json({
+    status: false,
+    message: "Invalid blog id",
+  });
 };
 
 // get blog by id
@@ -23,24 +32,7 @@ exports.get = async (req, res) => {
   try {
     const { blogId } = req.params;
 
-    const blog = await Blog.findById(blogId);
-    await User.aggregate([
-      {
-        $lookup: {
-          from: "users",
-          localField: "first_name",
-          foreignField: "_id",
-          as: "user",
-        },
-      },
-    ]);
-
-    // await User.findById(id)
-    //   .populate("blogs") // key to populate
-    //   .then((user) => console.log(user))
-    //   .catch((err) => console.log(err));
-
-    // for everytime a blog is requested it increase the read_count by 1
+    const blog = await Blog.findById(blogId).populate("user");
     blog.read_count += 1;
 
     // This calculates the time used to read a blog post
@@ -61,7 +53,7 @@ exports.get = async (req, res) => {
     blog.save();
 
     if (!blog) {
-      3;
+      return res.status(404).json({ status: false, blog: null });
     }
 
     return res.json({ status: true, blog });
@@ -74,7 +66,7 @@ exports.update = async (req, res) => {
   try {
     const { id } = req.params;
     const { state } = req.body;
-    const blog = await Blog.findById(id);
+    const blog = await Blog.findOne({ _id: id, user: req.user.user });
 
     if (!blog) {
       return res.status(404).json({ status: false, blog: null });
@@ -110,6 +102,7 @@ exports.getBlogs = async (req, res) => {
     if (state) {
       filter.state = state;
     }
+
     if (author) {
       filter.author = author;
     }

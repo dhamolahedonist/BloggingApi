@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 
 const BlogSchema = new mongoose.Schema(
   {
-    senderId: {
+    user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
     },
