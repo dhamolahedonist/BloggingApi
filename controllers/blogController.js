@@ -114,6 +114,7 @@ exports.getBlogs = async (req, res) => {
     }
 
     const blogs = await Blog.find(filter)
+      .populate("user")
       .sort(sort)
       .limit(limit * 1)
       .skip((page - 1) * limit);
