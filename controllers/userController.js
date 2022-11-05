@@ -21,7 +21,6 @@ exports.updateUSer = async (req, res) => {
 exports.getUser = async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
-    console.log(user._id);
     // destructured the user object. this allows me to get all other informations about a user except the password
     const { password, ...others } = user._doc;
     res.status(200).json(others);
