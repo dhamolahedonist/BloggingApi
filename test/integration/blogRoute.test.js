@@ -120,11 +120,7 @@ it.skip("PATCH /blog/:id", async () => {
       .end((err, response) => {
         response.body.should.have.property("blog");
         console.log(response.body);
-        // response.should.have.status(201);
-        // expect(response.body.blog).toBeDefined();
-        // expect(response.body.blog.state).toBe("published");
-        // response.body.should.be.a("object");
-        // response.body.should.have.property("blog");
+
         resolve();
       });
   });
