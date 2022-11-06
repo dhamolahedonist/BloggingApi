@@ -32,7 +32,11 @@ exports.get = async (req, res) => {
   try {
     const { blogId } = req.params;
 
-    const blog = await Blog.findById(blogId).populate("user");
+    const blog = await Blog.findById(blogId).populate("user", [
+      "email",
+      "first_name",
+      "last_name",
+    ]);
 
     blog.read_count += 1;
 
@@ -113,7 +117,7 @@ exports.getBlogs = async (req, res) => {
     }
 
     const blogs = await Blog.find(filter)
-      .populate("user")
+      .populate("user", ["email", "first_name", "last_name"])
       .sort(sort)
       .limit(limit * 1)
       .skip((page - 1) * limit);
