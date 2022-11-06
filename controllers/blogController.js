@@ -81,7 +81,7 @@ exports.update = async (req, res) => {
 
     await blog.save();
 
-    return res.json({ status: true, blog });
+    return res.status(201).json({ status: true, blog });
   } catch (error) {
     res.status(500).json(error);
   }
