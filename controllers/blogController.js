@@ -72,9 +72,12 @@ exports.update = async (req, res) => {
     const { id } = req.params;
     const { state } = req.body;
     const blog = await Blog.findOne({ _id: id, user: req.user.user });
+    console.log(blog);
 
     if (!blog) {
-      return res.status(404).json({ status: false, blog: null });
+      return res
+        .status(404)
+        .json({ status: false, blog: null, error: "Blog post not found" });
     }
 
     blog.state = state;

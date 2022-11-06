@@ -4,10 +4,13 @@ const expect = require("chai").expect;
 process.env.MONGODB_URI = "mongodb://localhost:27017/BloggingApi";
 const app = require("../../app");
 const blogModel = require("../../models/blogModel");
+const userModel = require("../../models/userModel");
 
 const header = {
-  Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7Il9pZCI6IjYzNjIyNWYxZjVkYTBkZTJlZWQwYjI2NCIsImVtYWlsIjoic2FtQGdtYWlsLmNvbSJ9LCJpYXQiOjE2Njc3MzYzNTMsImV4cCI6MTY2NzczOTk1M30.buMyutmA3N1NlgAj7BsStOj9KBGi1PTasNhgRw4D61k`,
+  Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7Il9pZCI6IjYzNjdkZWRhYTBkYWQzNzcxMjY3ZGMyNyIsImVtYWlsIjoiZGFtQGdtYWlsLmNvbSJ9LCJpYXQiOjE2Njc3NTE2NzQsImV4cCI6MTY2Nzc1NTI3NH0.13S7NSmAZSLfGnXrNd25aWanGw3Im1e_HhPIJCt4iDM`,
 };
+
+const user_id = "6367dedaa0dad3771267dc27";
 
 chai.use(chaiHttp);
 chai.should();
@@ -15,6 +18,16 @@ chai.expect();
 
 const cleanup = async () => {
   await blogModel.deleteMany();
+};
+
+const getHeader = async () => {
+  // Create a user
+  // Get the token
+  const token = null;
+
+  return {
+    Authorization: `Bearer ${token}`,
+  };
 };
 
 describe("Get Blog", () => {
@@ -76,16 +89,19 @@ it.skip("POST /blog/create", async () => {
   });
 });
 
-it.skip("DELETE /blog/:id", async () => {
+it("DELETE /blog/:id", async () => {
   return new Promise(async (resolve) => {
     await cleanup();
+
+    const user = await userModel.findById(user_id);
     const blog = await blogModel.create({
       title: "Body",
       description: "blog",
       state: "draft",
       author: "Jack",
       tags: ["ok", "body "],
-      body: "Protein is what your body uses to build new cells, to create thinking neurotransmitters, plus whatever immune cells your body needs right now. It's made up of many 'amino acid' molecules. Some foods contain all of the amino acids, some only some of them. Your stomach has a big job ahead of it when you eat protein: those molecules are tough to break down into amino acids so your stomach has to use strong acids, enzymes, as well as physical force. But once the job is done your body is ready to re-shape those amino acids into new cells, enzymes, neurotransmitters, whatever needs to be built.",
+      body: "body",
+      user: user._id,
     });
 
     chai
@@ -95,33 +111,48 @@ it.skip("DELETE /blog/:id", async () => {
       .end((err, response) => {
         response.should.have.status(200);
         response.body.should.be.a("object");
+        response.body.should.have.property("status", true);
+        expect(response.body.blog.acknowledged).to.equal(true);
+        expect(response.body.blog.deletedCount).to.equal(1);
         resolve();
       });
   });
 });
 
 it.skip("PATCH /blog/:id", async () => {
-  return new Promise(async (resolve) => {
-    await cleanup();
-    const blog = await blogModel.create({
-      title: "Body",
-      description: "blog",
-      state: "draft",
-      author: "Jack",
-      tags: ["ok", "body "],
-      body: "Protein is what your body uses to build new cells, to create thinking neurotransmitters, plus whatever immune cells your body needs right now. It's made up of many 'amino acid' molecules. Some foods contain all of the amino acids, some only some of them. Your stomach has a big job ahead of it when you eat protein: those molecules are tough to break down into amino acids so your stomach has to use strong acids, enzymes, as well as physical force. But once the job is done your body is ready to re-shape those amino acids into new cells, enzymes, neurotransmitters, whatever needs to be built.",
-    });
+  return new Promise(async (resolve, reject) => {
+    try {
+      await cleanup();
 
-    chai
-      .request(app)
-      .patch(`/blog/${blog._id}`)
-      .set(header)
-      .send({ state: "published" })
-      .end((err, response) => {
-        response.body.should.have.property("blog");
-        console.log(response.body);
-
-        resolve();
+      const user = await userModel.findById(user_id);
+      const blog = await blogModel.create({
+        title: "Body",
+        description: "blog",
+        state: "draft",
+        author: "Jack",
+        tags: ["ok", "body "],
+        body: "Body",
+        user: user._id,
       });
+
+      //   const url = `/blog/${blog._id.toString()}`;
+      //   console.log(url);
+
+      chai
+        .request(app)
+        .patch(`/blog/${blog._id.toString()}`)
+        .set(header)
+        .send({ state: "published" })
+        .end((err, response) => {
+          response.body.should.have.property("blog");
+          response.body.should.have.property("status", true);
+          expect(response.body.blog._id).to.equal(blog._id.toString());
+          expect(response.body.blog.state).to.equal("published");
+
+          resolve();
+        });
+    } catch (error) {
+      reject(error);
+    }
   });
 });
