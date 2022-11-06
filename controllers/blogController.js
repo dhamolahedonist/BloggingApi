@@ -33,6 +33,7 @@ exports.get = async (req, res) => {
     const { blogId } = req.params;
 
     const blog = await Blog.findById(blogId).populate("user");
+
     blog.read_count += 1;
 
     // This calculates the time used to read a blog post
@@ -97,11 +98,9 @@ exports.getBlogs = async (req, res) => {
       }
     }
 
-    const filter = {};
-
-    if (state) {
-      filter.state = state;
-    }
+    const filter = {
+      state: "published",
+    };
 
     if (author) {
       filter.author = author;
